@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Shows trivia about books using machine learning",
   "scripts": {
-    "build": "NODE_ENV=production webpack --progress --colors -p",
+    "build": "set NODE_ENV=production webpack --progress --colors -p",
     "start": "concurrently -n \"WEBPACK,FLASK\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run webpack-dev-server\" \"npm run flask-server\"",
-    "webpack-dev-server": "NODE_ENV=debug webpack-dev-server --port 2992 --hot --inline",
-    "flask-server": "flask run",
+    "webpack-dev-server": "set NODE_ENV=debug & webpack-dev-server --port 2992 --hot --inline",
+    "flask-server": "SET FLASK_APP=autoapp.py&SET FLASK_DEBUG=1&pipenv run flask run",
     "lint": "eslint \"assets/js/*.js\""
   },
   "repository": {
