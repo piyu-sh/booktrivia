@@ -60,3 +60,4 @@ env/
 
 # Local files
 .history/
+npm-debug.log.*
