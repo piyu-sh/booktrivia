@@ -1,0 +1,17 @@
+[[source]]
+name = "pypi"
+verify_ssl = true
+url = "https://pypi.org/simple"
+
+[packages]
+flask-restplus = "*"
+flask = "*"
+python-dotenv = "*"
+pytest = "*"
+pytest-flask = "*"
+
+[dev-packages]
+pylint = "*"
+
+[requires]
+python_version = "3.5"
