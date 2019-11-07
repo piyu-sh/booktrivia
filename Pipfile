@@ -9,6 +9,8 @@ flask = "*"
 python-dotenv = "*"
 pytest = "*"
 pytest-flask = "*"
+flask-sqlalchemy = "==2.4.1"
+"psycopg2" = "==2.8.4"
 
 [dev-packages]
 pylint = "*"

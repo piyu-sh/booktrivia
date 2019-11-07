@@ -12,3 +12,9 @@ PYTHON_ENV=development python src/main.py
 
 # run test in pipenv shell
 python -m pytest 
+
+
+
+# Database
+check if postgres service is up through services.msc
+user/pass - postgres/same
