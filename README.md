@@ -18,3 +18,9 @@ python -m pytest
 # Database
 check if postgres service is up through services.msc
 user/pass - postgres/same
+
+# Database migration
+flask db init - used initially to setup tables
+flask db migrate - whenever tables change
+flask db upgrade - actually run the changes in tables
+flask db downgrade - revert the changes from tables

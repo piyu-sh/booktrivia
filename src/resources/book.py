@@ -44,21 +44,26 @@ class BookList(Resource):
 # The path parameter will be supplied as a parameter to every method
 @api.route('/books/<int:id>')
 class Book(Resource):
-    # Utility method
-    def find_one(self, id):
-        return next((b for b in books_db if b["id"] == id), None)
+    # # Utility method
+    # def find_one(self, id):
+    #     return next((b for b in books_db if b["id"] == id), None)
 
     @api.marshal_with(book)
     def get(self, id):
-        match = self.find_one(id)
-        return match if match else ("Not found", 404)
+        # match = self.find_one(id)
+        return Books.query.filter(Books.id==id).first()
 
     @api.marshal_with(book)
     def delete(self, id):
-        global books_db 
-        match = self.find_one(id)
-        books_db = list(filter(lambda b: b["id"] != id, books_db))
-        return match
+        # global books_db 
+        # match = self.find_one(id)
+        # books_db = list(filter(lambda b: b["id"] != id, books_db))
+        # return match
+        match = Books.query.filter(Books.id==id)
+        match.delete()
+        db.session.commit()
+        return match.first()
+
 
     # Ask flask_restplus to validate the incoming payload
     @api.expect(book, validate=True)

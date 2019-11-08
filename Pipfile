@@ -6,11 +6,12 @@ url = "https://pypi.org/simple"
 [packages]
 flask-restplus = "*"
 flask = "*"
-python-dotenv = "*"
+python-dotenv = "==0.10.3"
 pytest = "*"
 pytest-flask = "*"
 flask-sqlalchemy = "==2.4.1"
 "psycopg2" = "==2.8.4"
+flask-migrate = "==2.5.2"
 
 [dev-packages]
 pylint = "*"
