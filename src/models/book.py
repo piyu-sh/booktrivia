@@ -4,11 +4,17 @@ from server.instance import server
 
 db = server.db
 
+fact = server.api.model('Fact', {
+    'id': fields.Integer(readonly=True),
+    'fact_text': fields.String(description="fact text"),
+    'book_id': fields.Integer(readonly=True)
+})
+
 book = server.api.model('Book', {
     'id': fields.Integer(readonly=True),
     'title': fields.String(required=True, min_length=1, max_length=200, description='Book title'),
-    'imageURL': fields.Url(description="url to fetch book cover"),
-    'facts': fields.List(fields.String(description='fact'))
+    'imageURL': fields.String(description="url to fetch book cover"),
+    'facts': fields.List(fields.Nested(fact))
 })
 
 class Books(db.Model):
