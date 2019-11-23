@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_restplus import Api, Resource, fields
+from flask_restplus import Api
 from environment.instance import environment_config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate

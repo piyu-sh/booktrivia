@@ -1,33 +1,30 @@
 from flask import Flask
-from flask_restplus import Api, Resource, fields
+from flask_restplus import Resource, fields, Namespace
 
 from server.instance import server
-from models.book import book, Books, Facts
+from models.book import bookWithFacts, bookWithoutFacts, fact, Books, Facts
 
 from werkzeug.exceptions import BadRequest
 from flask import abort
 
 app, api, db = server.app, server.api, server.db
 
-# Let's just keep them in memory 
-books_db = [
-    {"id": 0, "title": "War and Peace"},
-    {"id": 1, "title": "Python for Dummies"},
-]
+booksApi = Namespace('books', description='urls for book related operations')
+api.add_namespace(booksApi)
 
 # This class will handle GET and POST to /books
-@api.route('/books')
+@booksApi.route('/')
 class BookList(Resource):
-    @api.marshal_list_with(book)
+    @booksApi.marshal_list_with(bookWithFacts)
     def get(self):
         return Books.query.all()
 
     # Ask flask_restplus to validate the incoming payload
-    @api.expect(book, validate=True)
-    @api.marshal_with(book)
+    @booksApi.expect(bookWithFacts, validate=True)
+    @booksApi.marshal_with(bookWithFacts)
     def post(self):
-        newBook = Books(title = api.payload.get('title'), imageURL=api.payload.get('imageURL'))
-        for fact in api.payload.get('facts'):
+        newBook = Books(title = booksApi.payload.get('title'), imageURL=booksApi.payload.get('imageURL'))
+        for fact in booksApi.payload.get('facts'):
             newBook.facts.append(Facts(fact_text = fact.get('fact_text')))
         db.session.add(newBook)
         db.session.commit()
@@ -35,14 +32,16 @@ class BookList(Resource):
 
 
 
-# Handles GET and PUT to /books/:id
+# Handles GET, DELETE and PUT to /books/:id
 # The path parameter will be supplied as a parameter to every method
-@api.route('/books/<int:id>')
+@booksApi.route('/<int:id>')
 class Book(Resource):
-    @api.marshal_with(book)
+    @booksApi.marshal_with(bookWithFacts)
     def get(self, id):
-        # match = self.find_one(id)
-        return Books.query.filter(Books.id==id).first()
+        match = Books.query.filter(Books.id==id).first()
+        if match is None:
+            raise BadRequest('id not present')
+        return match
 
     def delete(self, id):
         match = Books.query.filter(Books.id==id)
@@ -55,11 +54,13 @@ class Book(Resource):
 
 
     # Ask flask_restplus to validate the incoming payload
-    @api.expect(book, validate=True)
-    @api.marshal_with(book)
+    @booksApi.expect(bookWithoutFacts, validate=True)
+    @booksApi.marshal_with(bookWithFacts)
     def put(self, id):
-        match = self.find_one(id)
-        if match != None:
-            match.update(api.payload)
-            match["id"] = id
+        match = Books.query.filter(Books.id==id).first()
+        if match is None:
+            raise BadRequest('id not present')
+        match.title = booksApi.payload.get('title')
+        match.imageURL=booksApi.payload.get('imageURL')
+        db.session.commit()
         return match

@@ -10,10 +10,13 @@ fact = server.api.model('Fact', {
     'book_id': fields.Integer(readonly=True)
 })
 
-book = server.api.model('Book', {
+bookWithoutFacts = server.api.model('BookWithoutFacts', {
     'id': fields.Integer(readonly=True),
     'title': fields.String(required=True, min_length=1, max_length=200, description='Book title'),
     'imageURL': fields.String(description="url to fetch book cover"),
+})
+
+bookWithFacts = server.api.inherit('BookWithFacts', bookWithoutFacts, {
     'facts': fields.List(fields.Nested(fact))
 })
 
