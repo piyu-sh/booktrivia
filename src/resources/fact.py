@@ -14,7 +14,7 @@ api.add_namespace(factsApi)
 
 # This class will handle GET and POST to /facts/book/:id
 @factsApi.route('/book/<int:id>')
-class BookList(Resource):
+class FactList(Resource):
 
     @factsApi.doc(description='fetch all facts corresponding to a book id')
     @factsApi.marshal_list_with(fact)
