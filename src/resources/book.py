@@ -15,9 +15,19 @@ api.add_namespace(booksApi)
 # This class will handle GET and POST to /books
 @booksApi.route('/')
 class BookList(Resource):
+    @booksApi.doc(description='get books that contain this title keyword')
+    @booksApi.param(name='title', description='title of book', type='string')
     @booksApi.marshal_list_with(bookWithFacts)
     def get(self):
-        return Books.query.all()
+        parser = booksApi.parser()
+        parser.add_argument('title', location='args', help='get books that contain this title keyword')
+        args = parser.parse_args()
+        search = args['title'].strip() if args['title'] else ''
+        if not search:
+            return Books.query.all()
+        else:
+            search = "%{}%".format(args['title'])
+            return Books.query.filter(Books.title.like(search)).all()
 
     # Ask flask_restplus to validate the incoming payload
     @booksApi.expect(bookWithFacts, validate=True)
