@@ -21,14 +21,14 @@ bookWithFacts = server.api.inherit('BookWithFacts', bookWithoutFacts, {
 })
 
 class Books(db.Model):
-    __tablename_ = 'Books'
+    __tablename_ = 'books'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text, unique=True, nullable=False )
     imageURL = db.Column(db.Text, nullable=True)
     facts = db.relationship('Facts', passive_deletes=True, backref=db.backref('books'))
 
 class Facts(db.Model):
-    __tablename_ = 'Facts'
+    __tablename_ = 'facts'
     id = db.Column(db.Integer, primary_key=True)
     fact_text = db.Column(db.Text, nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id',  ondelete='CASCADE'))
