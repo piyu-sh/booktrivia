@@ -8,6 +8,10 @@ searchWordsApiModel = server.api.model('Fact', {
     'keyword': fields.String(description="keyword or phrase"),
 })
 
+searchQueryApiModel = server.api.model('SearchQuery', {
+    'searchQuery': fields.String(description="search query")
+})
+
 class SearchWordsDBModel(db.Model):
     __tablename__ = 'search_words'
     id = db.Column(db.Integer, primary_key=True)

@@ -6,6 +6,7 @@ import sys, os
 from resources.book import *
 from resources.fact import *
 from resources.searchWord import *
+from resources.searchQuery import *
 
 if __name__ == '__main__':
     server.run()
