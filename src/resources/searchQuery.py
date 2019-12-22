@@ -19,6 +19,6 @@ class SearchQueryList(Resource):
     @searchQueryApiNS.marshal_list_with(searchQueryApiModel)
     def get(self):
         seach_query = func.concat(Books.title," ", SearchWordsDBModel.keyword)
-        result = (db.session.query(seach_query.label("searchQuery"))).select_from(Books, SearchWordsDBModel).all()        
+        result = (db.session.query(seach_query.label("searchQuery"))).select_from(Books, SearchWordsDBModel).order_by(Books.id).all()       
         return [{'searchQuery': row.searchQuery} for row in result]
 
