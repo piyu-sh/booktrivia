@@ -4,11 +4,19 @@
   "description": "searches search engine results for keywords",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
+    "build-watch": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "piyush_g@outlook.com",
   "license": "ISC",
   "dependencies": {
-    "se-scraper": "file:../../../se-scraper"
+    "cross-env": "^7.0.2",
+    "node-fetch": "^2.6.0",
+    "se-scraper": "^1.5.7"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.7",
+    "typescript": "^3.8.3"
   }
 }

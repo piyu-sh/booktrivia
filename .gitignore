@@ -63,3 +63,4 @@ env/
 npm-debug.log.*
 .vscode/
 node_modules/
+dist/
