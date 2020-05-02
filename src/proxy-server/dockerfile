@@ -1,0 +1,16 @@
+FROM alpine
+
+RUN apk add g++ python3-dev libffi-dev py3-pip && pip3 install pipenv
+
+COPY . /proxy-server
+WORKDIR /proxy-server
+
+RUN pipenv install --system --deploy
+
+# TODO - Proxy server is very slow right now, revisit it later
+# comments out line `self._ip_hosts.remove(host)`
+COPY resolver.py /usr/lib/python3.8/site-packages/proxybroker/resolver.py
+EXPOSE 3001
+
+CMD [ "python3", "server.py" ]
+
