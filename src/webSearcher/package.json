@@ -6,16 +6,20 @@
   "scripts": {
     "build": "tsc",
     "build-watch": "tsc -w",
+    "dev": "concurrently -n \"watch,server\" \"npm run build-watch\" \"node dist/server.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "piyush_g@outlook.com",
   "license": "ISC",
   "dependencies": {
+    "concurrently": "^5.2.0",
     "cross-env": "^7.0.2",
+    "express": "^4.17.1",
     "node-fetch": "^2.6.0",
     "se-scraper": "^1.5.7"
   },
   "devDependencies": {
+    "@types/express": "^4.17.6",
     "@types/node-fetch": "^2.5.7",
     "typescript": "^3.8.3"
   }

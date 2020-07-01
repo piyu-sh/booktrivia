@@ -9,16 +9,17 @@ const scraper = async (browser_config:any, scrape_job:any) => {
 
     var results = await scraper.scrape(scrape_job);
     await scraper.quit();
+    return results;
 };
 
-const search_results = async (keywords: string[], proxy:string, outFile:string = path.join(__dirname +'\\..\\results.json')) => {
+const search_results = async (keywords: string[], proxy:string, outFile?:string) => {
 
     const browser_config = {
         debug_level: 1,
         output_file: outFile,
         proxy,
-        log_ip_address: true,
-        use_proxies_only: true,
+        // log_ip_address: true,
+        // use_proxies_only: true,
     };
     
     const scrape_job = {
@@ -37,7 +38,7 @@ const search_results = async (keywords: string[], proxy:string, outFile:string =
 //     search_results(['The Da Vinci Code interesting facts'], proxy).then(res => console.log(res));
 // });
 
-const prllProxyFetch = async (keywords: string[]) => {
+export const prllProxyFetch = async (keywords: string[]) => {
     const start  = Date.now();
 
     // const resultPromise = async (index:number) => {
@@ -50,11 +51,11 @@ const prllProxyFetch = async (keywords: string[]) => {
         const resultPomises = keywords.map(async (keyword, index) => {
             const proxy = await fetchProxies(1);
             console.log("prllProxyFetch -> proxy", proxy);
-            proxy && await search_results([keyword],proxy, __dirname +`\\..\\prllProxyFetch${index}.json`)
+            return proxy && await search_results([keyword],proxy);
         })
-        Promise.all(resultPomises).then(()=>{
-            console.log("prllProxyFetch -> end ",Date.now() - start)
-        });
+        const result = await Promise.all(resultPomises)
+        console.log("prllProxyFetch -> end ",Date.now() - start)
+        return result;
         // for (let index = 0; index < keywords.length; index++) {
         //     // proxyPromises.push(fetchProxies(1));
         //     const a = Date.now();
@@ -83,30 +84,30 @@ const prllProxyFetch = async (keywords: string[]) => {
     }
 }
 
-const seqProxyFetch = async (keywords: string[]) => {
+export const seqProxyFetch = async (keywords: string[]) => {
     const start  = Date.now();
     const proxies = await fetchProxies(keywords.length);
     let searchPromises = [];
     for (let index = 0; index < keywords.length; index++) {
-        searchPromises.push(search_results([keywords[index]],proxies[index], __dirname +`\\..\\seqProxyFetch${index}.json`));
+        searchPromises.push(search_results([keywords[index]],proxies[index]));
     }
-    Promise.all(searchPromises).then(res => {
-        console.log(res)
-        console.log("seqProxyFetch -> end ",Date.now() - start)
-    })
+    const result = await Promise.all(searchPromises);
+    // console.log(res)
+    console.log("seqProxyFetch -> end ",Date.now() - start)
+    return result;
 }
 
-const oneProxyFetch = async (keywords: string[]) => {
+export const oneProxyFetch = async (keywords: string[]) => {
     const start  = Date.now();
     const proxies = await fetchProxies(1);
     let searchPromises = [];
     for (let index = 0; index < keywords.length; index++) {
-        searchPromises.push(search_results([keywords[index]],proxies[0], __dirname +`\\..\\oneProxyFetch${index}.json`));
+        searchPromises.push(search_results([keywords[index]],proxies[0]));
     }
-    Promise.all(searchPromises).then(res => {
-        console.log(res)
-        console.log("oneProxyFetch -> end ",Date.now() - start)
-    })
+    const result = await Promise.all(searchPromises);
+    // console.log(res);
+    console.log("oneProxyFetch -> end ",Date.now() - start)
+    return result;
 }
 
 
@@ -122,4 +123,4 @@ const caller = () => {
     // oneProxyFetch(keywords)
 }
 
-caller();
+// caller();
