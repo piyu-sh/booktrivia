@@ -44,6 +44,11 @@ testD= np.array(list(map(lambda v: re.sub(r'\b[0-9]{1,4}\b', 'NUMBERSPECIALTOKEN
 #                    'Fun facts found in Outliers by Gladwell - Marketing Action, Inc.',
 #                     'Outliers Chapter 2: The 10,000-Hour Rule Summary & Analysis from ...',
 #                    'Malcolm Gladwell"s 5 Best Life Lessons for Entrepreneurs | Inc.com']
+# testD = np.array(['Are you an Outlier? 6 Unexpected Keys to Success from Malcolm ...',
+#                    'Fun facts found in Outliers by Gladwell - Marketing Action, Inc.',
+#                     'Outliers Chapter 2: The 10,000-Hour Rule Summary & Analysis from ...',
+#                    'Malcolm Gladwell"s 5 Best Life Lessons for Entrepreneurs | Inc.com']
+#                    )                   
 testX = loaded_pipeline.transform(testD).todense()
 
 result = loaded_model.predict(testX)
