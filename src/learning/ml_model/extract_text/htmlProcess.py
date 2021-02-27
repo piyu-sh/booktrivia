@@ -52,10 +52,10 @@ def getSentences(soup):
     return sentences
 
 
-def getSoupObj(url):
+def getSoupObj(url, retries: int):
 #     req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
 #     html = urlopen(req).read()
-    html = getHtmlUsingProxies(url, cfg['proxyApi'])
+    html = getHtmlUsingProxies(url, cfg['proxyApi'], retries)
     soup = BeautifulSoup(html, 'lxml')
     return soup
 
@@ -79,13 +79,13 @@ def getSents(text: str):
     sentences = [sent for sent in text.splitlines() if sent.strip()]
     return sentences
 
-def getDocs(results: DataFrame, columnName: str):
+def getDocsAndSents(results: DataFrame, columnName: str, retries: int):
     text_dic = {}
     sents_dic = {}
     g = Goose()
     for index in range(len(results)):
         url = results.iloc[index][columnName]
-        soup = getSoupObj(url)
+        soup = getSoupObj(url, retries)
 #         sents = getSentences(soup)
         article = g.extract(raw_html=str(soup if soup.get_text().strip() else '.'))
         sents = getSents(article.cleaned_text)

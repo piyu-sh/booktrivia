@@ -20,8 +20,9 @@ def getHtmlUsingProxies(url:str, proxyApiUrl:str, retries:int=3):
                 print('Skipping. status code '+ str(response.status_code))
         except requests.exceptions.Timeout:
             x -= 1
-            timeout += 1
-            print("timed out increasing timeout, timeout now is: "+ str(timeout) )
+            if( x < (len(proxiesList) - 1)):
+                timeout *= 2
+                print("timed out increasing timeout, timeout now is: "+ str(timeout) )
         except Exception as e:
             #Most free proxies will often get connection errors. You will have retry the entire request using another proxy to work. 
             #We will just skip retries as its beyond the scope of this tutorial and we are only downloading a single url 

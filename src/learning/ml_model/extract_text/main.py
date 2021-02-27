@@ -1,41 +1,84 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
+import os, sys
+
+# currentdir = os.path.dirname(os.path.realpath(__file__))
+# parentdir = os.path.dirname(currentdir)
+# sys.path.append(parentdir)
+# sys.path.append(currentdir)
+
+
 from random import randint
-import datetime, sys
-import math
 import nltk
 import pandas as pd
-from .htmlProcess import getDocs, tokenize_and_stem
-
+from yaml import dump, load
+from .htmlProcess import getDocsAndSents
+from .tfidf import getLemmatizedDoc, getSummary, getTrainedTfidfModel
 import yaml
-import os
+from ..train_data.train_data import getCorpusData
+import joblib
+from hashlib import blake2b
+import datetime
+
+def getHash(data: dict):
+    hashObj = blake2b()
+    for item in data:
+        hashObj.update(item.encode('utf-8'))
+    return hashObj.hexdigest()
+
+def writeHash(hashValue, hashFilePath):
+    hashSame = True
+    prevHashValue = ''
+
+    if(os.path.isfile(hashFilePath)):
+        hashFile = open(hashFilePath, 'r')
+        prevHashValue = hashFile.read()
+        hashFile.close()
+    
+    if(hashValue != prevHashValue):
+        hashFile = open(hashFilePath, 'w')
+        hashFile.write(hashValue)
+        hashSame = False
+        hashFile.close()
+
+    return hashSame
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 with open(os.path.join(dir_path, "../../../config.yaml"), "r") as ymlfile:
     cfg = yaml.load(ymlfile)
 
-articleUrl = 'https://www.goodreads.com/book/show/30257963-12-rules-for-life'
+
+corpusData = getCorpusData(corpusdir='/home/piyush/Downloads/text0/')
+# corpusData = getCorpusData(corpusdir='/home/piyush/Downloads/iweb/')
+
+
+hashValue = getHash(corpusData)
+hashSame = writeHash(hashValue, os.path.join(dir_path,'corpusHash.txt'))
+# hashSame = writeHash(hashValue, os.path.join(dir_path,'corpusHashIweb.txt'))
+
+trainedModel = ()
+if(hashSame and os.path.isfile(os.path.join(dir_path,'trainedTFVector.joblib'))):
+# if(hashSame and os.path.isfile(os.path.join(dir_path,'trainedTFVectorIweb.joblib'))):
+    print('loading model at: ' + str(datetime.datetime.now()))
+    trainedModel = joblib.load(os.path.join(dir_path,'trainedTFVector.joblib'))
+    # trainedModel = joblib.load(os.path.join(dir_path,'trainedTFVectorIweb.joblib'))
+    print('done! model loaded' + str(datetime.datetime.now()))
+else:
+    # TODO - use corpus data for training, docs_dict is test data 
+    trainedModel = getTrainedTfidfModel(trainData=corpusData.values())
+    joblib.dump(trainedModel, os.path.join(dir_path,'trainedTFVector.joblib'))
+    # joblib.dump(trainedModel, os.path.join(dir_path,'trainedTFVectorIweb.joblib'))
+(tfidf, tdm) = trainedModel
+
+# articleUrl = 'https://www.goodreads.com/book/show/30257963-12-rules-for-life'
+# articleUrl = 'https://michael-bonnell.com/12-rules-for-life-an-antidote-to-chaos/';
+articleUrl = 'https://bookfail.com/nonfiction/658-12-rules-for-life-an-antidote-to-chaos.html';
+
 # print(getHtmlUsingProxies('https://www.goodreads.com/book/show/30257963-12-rules-for-life', cfg['proxyApi']))
 
 urlDataframe = pd.DataFrame([articleUrl], columns=['1'])
-docs_dict, sents_dict = getDocs(urlDataframe, '1')
-        
-tfidf = TfidfVectorizer(tokenizer=tokenize_and_stem, stop_words='english', decode_error='ignore', ngram_range=(1,3))
-print('building term-document matrix... [process started: ' + str(datetime.datetime.now()) + ']')
-sys.stdout.flush()
-
-tdm = tfidf.fit_transform(docs_dict.values()) # this can take some time (about 60 seconds on my machine)
-print('done! [process finished: ' + str(datetime.datetime.now()) + ']')
+docs_dict, sents_dict = getDocsAndSents(urlDataframe, '1', 5)
 
 
-feature_names = tfidf.get_feature_names()
-print('TDM contains ' + str(len(feature_names)) + ' terms and ' + str(tdm.shape[0]) + ' documents')
-
-print('first term: ' + feature_names[0])
-print('last term: ' + feature_names[len(feature_names) - 1])
-
-for i in range(0, 4):
-    print('random term: ' + feature_names[randint(1,len(feature_names) - 2)])
 
 
 # article_id = randint(0, tdm.shape[0] - 1)
@@ -43,41 +86,12 @@ article_id = 0
 article_text = docs_dict[article_id]
 article_sents = sents_dict[article_id]
 
-sent_scores = []
-for sentence in article_sents:
-    score = 1
-    sent_tokens = tokenize_and_stem(sentence)
-    if len(sent_tokens)>0:
-        for token in (t for t in sent_tokens if t in feature_names):
-            score += tdm[article_id, feature_names.index(token)]
-        sent_scores.append((score / len(sent_tokens), sentence))
-
-summary_length = int(math.ceil(len(sent_scores) / 5))
-sent_scores.sort(key=lambda sent: sent[0], reverse=True)
-
-print('*** SUMMARY ***')
-for summary_sentence in sent_scores[:summary_length]:
-    if(len(nltk.word_tokenize(summary_sentence[1])) > 3):
-        print(summary_sentence[1])
-
-print('\n*** ORIGINAL ***')
-print(article_text)
+# TODO: tfidf is a trained model, now use test data, instead of just train data 
+summary_sents = getSummary( article_sents, article_id, tdm, tfidf)
 
 
 
 doc_complete = sents_dict[0]
 
-from nltk.corpus import stopwords 
-from nltk.stem.wordnet import WordNetLemmatizer
-import string
-stop = set(stopwords.words('english'))
-exclude = set(string.punctuation) 
-lemma = WordNetLemmatizer()
-def clean(doc):
-    stop_free = " ".join([i for i in doc.lower().split() if i not in stop])
-    punc_free = ''.join(ch for ch in stop_free if ch not in exclude)
-    normalized = " ".join(lemma.lemmatize(word) for word in punc_free.split())
-    return normalized
-
-doc_clean = [clean(doc).split() for doc in doc_complete]   
+doc_clean = getLemmatizedDoc(doc_complete)  
 

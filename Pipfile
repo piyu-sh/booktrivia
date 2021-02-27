@@ -22,10 +22,12 @@ pandas = "*"
 proxybroker = "*"
 nest-asyncio = "*"
 gensim = "*"
+cython = "*"
 
 [dev-packages]
 pylint = "*"
 ipykernel = "*"
+rope = "*"
 
 [requires]
 python_version = "3.8"
