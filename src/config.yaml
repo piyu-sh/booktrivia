@@ -1,1 +1,2 @@
-proxyApi: http://localhost:3001/proxy
+# proxyApi: http://localhost:3001/proxy
+proxyApi: http://localhost:5010/get/

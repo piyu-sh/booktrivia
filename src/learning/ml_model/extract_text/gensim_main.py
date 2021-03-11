@@ -82,7 +82,8 @@ else:
 (tfidf, dictionary, bow) = trainedModel
 
 # articleUrl = 'https://www.goodreads.com/book/show/30257963-12-rules-for-life'
-articleUrl = 'https://michael-bonnell.com/12-rules-for-life-an-antidote-to-chaos/'
+articleUrl = 'https://bookroo.com/quotes/12-rules-for-life-an-antidote-to-chaos'
+# articleUrl = 'https://michael-bonnell.com/12-rules-for-life-an-antidote-to-chaos/'
 # articleUrls = ['https://michael-bonnell.com/12-rules-for-life-an-antidote-to-chaos/', 'https://bookroo.com/quotes/12-rules-for-life-an-antidote-to-chaos']
 # print(getHtmlUsingProxies('https://www.goodreads.com/book/show/30257963-12-rules-for-life', cfg['proxyApi']))
 
