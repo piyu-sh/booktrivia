@@ -1,6 +1,6 @@
 const se_scraper = require('se-scraper');
 import path from 'path';
-import {fetchProxies} from './fetch-proxies';
+import {fetchProxies, fetchProxyJhao} from './fetch-proxies';
 
 const scraper = async (browser_config:any, scrape_job:any) => {
     
@@ -100,6 +100,7 @@ export const seqProxyFetch = async (keywords: string[]) => {
 export const oneProxyFetch = async (keywords: string[]) => {
     const start  = Date.now();
     const proxies = await fetchProxies(1);
+    console.log("🚀 ~ file: fetch-results.ts ~ line 104 ~ oneProxyFetch ~ proxy", proxies[0])
     let searchPromises = [];
     for (let index = 0; index < keywords.length; index++) {
         searchPromises.push(search_results([keywords[index]],proxies[0]));
@@ -110,6 +111,19 @@ export const oneProxyFetch = async (keywords: string[]) => {
     return result;
 }
 
+export const oneProxyFetchJhao = async (keywords: string[]) => {
+    const start  = Date.now();
+    const proxy = await fetchProxyJhao();
+    console.log("🚀 ~ file: fetch-results.ts ~ line 117 ~ oneProxyFetchJhao ~ proxy", proxy)
+    let searchPromises = [];
+    for (let index = 0; index < keywords.length; index++) {
+        searchPromises.push(search_results([keywords[index]],proxy));
+    }
+    const result = await Promise.all(searchPromises);
+    // console.log(res);
+    console.log("oneProxyFetch -> end ",Date.now() - start)
+    return result;
+}
 
 const caller = () => {
     const keywords = ["The Da Vinci Code trivia",

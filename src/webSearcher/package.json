@@ -7,7 +7,8 @@
     "build": "tsc",
     "build-watch": "tsc -w",
     "dev": "concurrently -n \"watch,server\" \"npm run build-watch\" \"node dist/server.js\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "node dist/server.js"
   },
   "author": "piyush_g@outlook.com",
   "license": "ISC",
