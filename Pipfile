@@ -23,6 +23,7 @@ nest-asyncio = "*"
 gensim = "*"
 cython = "*"
 pytest = "==6.1.2"
+werkzeug = "==0.16.1"
 
 [dev-packages]
 pylint = "*"
