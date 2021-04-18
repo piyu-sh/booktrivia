@@ -1,24 +1,16 @@
 import json
+from aiohttp import web
+from proxies import fetch_proxies
 
 
-def hello(event, context):
-    body = {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "input": "num of proxies" + event['pathParameters']['num']
-    }
+async def hello(event, context):
+    result = ''
+    try:
+        ifNumInParams = event['pathParameters'] is not None and event['pathParameters']['num'] is not None
+        numProxies = int(event['pathParameters']['num']) if ifNumInParams is True else 1
+        proxies = await fetch_proxies(numProxies)
+        result = web.json_response(proxies)
+    except Exception as e:
+        print(e)
+    return result
 
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(body)
-    }
-
-    return response
-
-    # Use this code if you don't use the http event with the LAMBDA-PROXY
-    # integration
-    """
-    return {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "event": event
-    }
-    """
