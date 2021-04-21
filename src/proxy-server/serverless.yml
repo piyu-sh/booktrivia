@@ -121,7 +121,7 @@ functions:
 
 plugins:
   - serverless-python-requirements
-# custom:
-#   pythonRequirements:
-#     dockerizePip: true
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
 #     dockerFile: ./dockerfile
