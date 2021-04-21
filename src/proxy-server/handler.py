@@ -27,7 +27,12 @@ def hello(event, context):
         numProxies = int(event['pathParameters']['num']) if ifNumInParams is True else 1
         loop = asyncio.get_event_loop()
         loop.run_until_complete(getProxiesObject(numProxies))
-        result =  web.json_response(proxiesObj)
+        print('proxiesObj: ', proxiesObj)
+        result =  {
+            "statusCode": 200,
+            "proxies": proxiesObj
+        }
+        print('result: ', result)
     except Exception as e:
         print(e)
-    return result
+    return json.dumps(result)
