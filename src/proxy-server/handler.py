@@ -30,7 +30,7 @@ def hello(event, context):
         print('proxiesObj: ', proxiesObj)
         result =  {
             "statusCode": 200,
-            "proxies": proxiesObj
+            "body": proxiesObj
         }
         print('result: ', result)
     except Exception as e:
