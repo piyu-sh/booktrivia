@@ -58,8 +58,8 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  getOwnProxies:
+    handler: handler.getOwnProxies
     events:
       - http:
           path: proxy/
