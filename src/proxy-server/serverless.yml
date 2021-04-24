@@ -61,7 +61,7 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  getOwnProxies:
+  getOwnProxiesImageFn:
     image:
       name: ownProxyImage
     events:
