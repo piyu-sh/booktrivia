@@ -1,6 +1,6 @@
-FROM alpine
+FROM public.ecr.aws/lambda/python:3.8
 
-RUN apk add g++ python3-dev libffi-dev py3-pip
+RUN yum install -y gcc-c++ python3-devel libffi-dev py3-pip
 RUN pip3 install pipenv --ignore-installed distlib
 
 COPY . /proxy-server
@@ -10,8 +10,9 @@ RUN pipenv install --system --deploy
 
 # TODO - Proxy server is very slow right now, revisit it later
 # comments out line `self._ip_hosts.remove(host)`
-COPY resolver.py /usr/lib/python3.8/site-packages/proxybroker/resolver.py
-EXPOSE 3001
+# COPY resolver.py /usr/lib/python3.8/site-packages/proxybroker/resolver.py
+COPY resolver.py /var/lang/lib/python3.8/site-packages/proxybroker/resolver.py
+# EXPOSE 3001
 
-CMD [ "python3", "server.py" ]
+CMD ["handler.getOwnProxies" ]
 
