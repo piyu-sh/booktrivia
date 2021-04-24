@@ -22,7 +22,6 @@ frameworkVersion: '2'
 
 provider:
   name: aws
-  runtime: python3.8
   ecr:
     # In this section you can define images that will be built locally and uploaded to ECR
     images:
