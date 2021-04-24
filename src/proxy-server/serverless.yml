@@ -23,7 +23,11 @@ frameworkVersion: '2'
 provider:
   name: aws
   runtime: python3.8
-  lambdaHashingVersion: 20201221
+  ecr:
+    # In this section you can define images that will be built locally and uploaded to ECR
+    images:
+      ownProxyImage:
+        path: ./
 
 # you can overwrite defaults here
 #  stage: dev
@@ -60,6 +64,8 @@ provider:
 functions:
   getOwnProxies:
     handler: handler.getOwnProxies
+    image:
+      name: ownProxyImage
     events:
       - http:
           path: proxy/
@@ -119,9 +125,9 @@ functions:
 #       Description: "Description for the output"
 #       Value: "Some output value"
 
-plugins:
-  - serverless-python-requirements
-custom:
-  pythonRequirements:
-    dockerizePip: non-linux
-#     dockerFile: ./dockerfile
+# plugins:
+#   - serverless-python-requirements
+# custom:
+#   pythonRequirements:
+#     dockerizePip: non-linux
+# #     dockerFile: ./dockerfile
