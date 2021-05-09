@@ -1,4 +1,4 @@
-import schema from './schema';
+// import schema from './schema';
 import { handlerPath } from '@libs/handlerResolver';
 import type { AWS } from '@serverless/typescript';
 

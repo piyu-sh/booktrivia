@@ -4,7 +4,7 @@ import getBooksNFacts from '@functions/getBooksNFacts';
 
 const serverlessConfiguration: AWS = {
   service: 'books-n-facts-server',
-  app: 'booktrivia-own-proxy-app',
+  app: 'books-n-facts-server',
   org: 'piyushg',
   frameworkVersion: '2',
   custom: {
@@ -56,9 +56,6 @@ const serverlessConfiguration: AWS = {
                 {
                    "AttributeName": "id",
                    "KeyType": "HASH"
-                },
-                {
-                  
                 }
              ],
              "ProvisionedThroughput": {
