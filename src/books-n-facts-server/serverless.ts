@@ -18,11 +18,27 @@ const serverlessConfiguration: AWS = {
         'ap-south-1'
       ],
       createStack: false
-    }
+    },
+    capacities: [
+      {
+         "table": "booksNFactsTable",
+         "read": {
+            "minimum": 2,
+            "maximum": 10,
+            "usage": 0.75
+         },
+         "write": {
+            "minimum": 2,
+            "maximum": 10,
+            "usage": 0.75
+         }
+      }
+   ]
   },
   plugins: [
     'serverless-webpack',
-    'serverless-create-global-dynamodb-table'
+    'serverless-create-global-dynamodb-table',
+    'serverless-dynamodb-autoscaling'
   ],
   provider: {
     name: 'aws',
