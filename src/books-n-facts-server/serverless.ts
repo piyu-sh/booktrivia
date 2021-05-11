@@ -1,7 +1,7 @@
 import type { AWS } from '@serverless/typescript';
 
 import getBooksNFacts from '@functions/getBooksNFacts';
-
+import { booksNFactsTable } from '@resources/booksNFactsTable';
 const serverlessConfiguration: AWS = {
   service: 'books-n-facts-server',
   app: 'books-n-facts-server',
@@ -15,7 +15,6 @@ const serverlessConfiguration: AWS = {
     globalTables: {
       version: 'v2', // optional, default is 'v1' (2017.11.29), please use 'v2' for (2019.11.21) version creation
       regions: [
-        'us-east-1',
         'ap-south-1'
       ],
       createStack: false
@@ -41,29 +40,7 @@ const serverlessConfiguration: AWS = {
   functions: { getBooksNFacts },
   resources: {
     "Resources": {
-       "booksNFactsTable": {
-          "Type": "AWS::DynamoDB::Table",
-          // "DeletionPolicy": "Retain", // Keeps around the DynamoDB resource when we redeploy/destroy
-          "Properties": {
-             "TableName": "booksNFactsTable",
-             "AttributeDefinitions": [
-                {
-                   "AttributeName": "id",
-                   "AttributeType": "S"
-                }
-             ],
-             "KeySchema": [
-                {
-                   "AttributeName": "id",
-                   "KeyType": "HASH"
-                }
-             ],
-             "ProvisionedThroughput": {
-                "ReadCapacityUnits": 4,
-                "WriteCapacityUnits": 4
-             }
-          }
-       }
+      booksNFactsTable
     }
  }
 };
