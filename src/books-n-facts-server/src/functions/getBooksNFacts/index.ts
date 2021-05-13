@@ -19,6 +19,6 @@ export default {
   ],
   environment: {
     flipkartApiKey: "${ssm:/flipkartApiKey}",
-    flipkartAffiliateId: "${ssm:/flipkartApiKey}"
+    flipkartAffiliateId: "${ssm:/flipkartAffiliateId}"
   }
 } as AWS['functions'][keyof AWS['functions']]
