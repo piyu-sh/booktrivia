@@ -12,13 +12,13 @@ const serverlessConfiguration: AWS = {
       webpackConfig: './webpack.config.js',
       includeModules: true,
     },
-    globalTables: {
-      version: 'v2', // optional, default is 'v1' (2017.11.29), please use 'v2' for (2019.11.21) version creation
-      regions: [
-        'ap-south-1'
-      ],
-      createStack: false
-    },
+    // globalTables: {
+    //   version: 'v2', // optional, default is 'v1' (2017.11.29), please use 'v2' for (2019.11.21) version creation
+    //   regions: [
+    //     'ap-south-1'
+    //   ],
+    //   createStack: false
+    // },
     capacities: [
       {
          "table": "booksNFactsTable",
