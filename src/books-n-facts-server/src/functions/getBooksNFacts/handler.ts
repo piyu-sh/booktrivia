@@ -9,6 +9,7 @@ import { middyfy } from '@libs/lambda';
 import schema from './schema';
 import config from '@config/index'
 const hello: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+  console.log("🚀 ~ file: handler.ts ~ line 12 ~ consthello:ValidatedEventAPIGatewayProxyEvent<typeofschema>= ~ event", event)
 
   const { flipkartAPI: {keywordAPI}} = config;
   const { flipkartApiKey, flipkartAffiliateId } = process.env;
@@ -36,6 +37,7 @@ const hello: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) =
   // return books data to ui
   return formatJSONResponse({
     message: `Hello , welcome to the exciting Serverless world!`,
+    books: flipkartBooks,
     event,
   });
 }

@@ -14,7 +14,8 @@ export default {
           schema: {
             'application/json': schema
           },
-        }
+        },
+        cors: true 
       }
     }
   ],
