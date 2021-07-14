@@ -57,3 +57,4 @@ sorted_result = loaded_lookup_tbl[result]
 
 print('result: ',result )
 print('sorted_result: ',sorted_result )
+final = [(sorted_result[index], title) for index, title in enumerate(url_titles)]
