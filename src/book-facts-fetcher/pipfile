@@ -11,6 +11,8 @@ pandasgui = "*"
 strsimpy = "*"
 fuzzywuzzy = "*"
 pyqt5 = "*"
+colorama = "*"
+tqdm = "*"
 
 [requires]
 python_version = "3.8"

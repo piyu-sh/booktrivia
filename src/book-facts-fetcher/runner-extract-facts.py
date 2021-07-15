@@ -11,18 +11,11 @@ import os, sys
 import logging
 
 from pandas.core.frame import DataFrame
-from colorama import init, Fore, Back, Style
-from tqdm import tqdm
-
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
-init(autoreset=True)
-
 from learning.ml_model.extract_links.extractLinksFn import getRelevantTitleIndices
-
-
 
 search_words = [
     'trivia',
@@ -76,18 +69,18 @@ class QueueObj(TypedDict):
     id: str
     query: str
 
-async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
+async def searchWorker(name: str, searchQueue: Queue):
     while True:
         # Get a "work item" out of the queue.
         data: QueueObj = await searchQueue.get()
         query = data['query']
         url = queryToUrl(query)
-        print(Fore.MAGENTA+f'{name} got url: {url} to work on')
+        print(f'{name} got url: {url} to work on')
         start = time.time()
         async with aiohttp.ClientSession() as session:
             # nonlocal results
             results = await getSearchQueryResults(session, url)
-        print(Fore.YELLOW+f'{name}\'s work for url {url} done; time taken {time.time() - start} seconds')
+        print(f'{name}\'s work for url {url} done; time taken {time.time() - start} seconds')
         if(len(results[0]['results']) > 0 and len(results[0]['results'][query]) > 0):
             print(f'query: \'{query}\' fetched with data')
             allResults = fromSearchData(results, query)
@@ -99,7 +92,6 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
             bookRow['searchLinks'] = [relevantSearchData]
             bookRow['query'] = query
             saveLinks(bookRow)
-            queueProgress.update(1)
             # searchResults.append({
             #     query: results
             # })
@@ -120,30 +112,24 @@ async def findAndSaveLinks(maxWorkers = 5):
     searchQueue = asyncio.Queue()
     searchWorkers = []
     # searchResults = []
-    queueProgress = tqdm(total=len(booksDf)*len(search_words), desc="total queue progress")
     for i in range(maxWorkers):
-        task = asyncio.create_task(searchWorker(f'worker{i}',searchQueue, queueProgress))
+        task = asyncio.create_task(searchWorker(f'worker{i}',searchQueue))
         searchWorkers.append(task)
         task.add_done_callback(_handle_task_result)
 
-    with tqdm(total=len(booksDf), desc="books data reading progress") as pbar:
-        for row in booksDf.itertuples():
-            # check in output file, if already that book id exist then skip
-            if('id' not in dfLinks or len(dfLinks[dfLinks['id']==row.id]) < len(search_words)):
-                # extract title
-                title, work = getStringsAB(row.title)
-                for term in search_words:
-                    query = f'{str(title).strip()} {term}'
-                    # check if that particular query for that book exists
-                    if('query' not in dfLinks or dfLinks[dfLinks['query']==query].size == 0 ):
-                        searchQueue.put_nowait({
-                                'id': row.id,
-                                'query': query
-                            })
-            pbar.update(1)
-            
-    queueProgress.total = searchQueue.qsize()
-    queueProgress.refresh()
+    for row in booksDf.itertuples():
+        # check in output file, if already that book id exist then skip
+        if('id' not in dfLinks or len(dfLinks[dfLinks['id']==row.id]) < len(search_words)):
+            # extract title
+            title, work = getStringsAB(row.title)
+            for term in search_words:
+                query = f'{str(title).strip()} {term}'
+                # check if that particular query for that book exists
+                if('query' not in dfLinks or dfLinks[dfLinks['query']==query].size == 0 ):
+                    searchQueue.put_nowait({
+                            'id': row.id,
+                            'query': query
+                        })
     await searchQueue.join()
     # cancel the now-idle workers, which wait for a new message that will never arrive
     for w in searchWorkers:
