@@ -25,11 +25,11 @@ from learning.ml_model.extract_links.extractLinksFn import getRelevantTitleIndic
 
 
 search_words = [
-    'trivia',
+    # 'trivia',
     'interesting trivia',
-    'interesting things',
+    # 'interesting things',
     'interesting facts',
-    'shocking facts',
+    # 'shocking facts',
     "things you didn't know"
 ]
 
@@ -84,12 +84,20 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
         url = queryToUrl(query)
         print(Fore.MAGENTA+f'{name} got url: {url} to work on')
         start = time.time()
-        async with aiohttp.ClientSession() as session:
+        custom_timeout = aiohttp.ClientTimeout(total=60) # type: ignore
+        # custom_timeout.total = 2*60
+        async with aiohttp.ClientSession(timeout=custom_timeout) as session:
             # nonlocal results
-            results = await getSearchQueryResults(session, url)
+            results=[]
+            try:
+                results = await getSearchQueryResults(session, url)
+            except asyncio.TimeoutError as e:
+                logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}' )
+            except Exception as e:  # pylint: disable=broad-except
+                logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}' )
         print(Fore.YELLOW+f'{name}\'s work for url {url} done; time taken {time.time() - start} seconds')
-        if(len(results[0]['results']) > 0 and len(results[0]['results'][query]) > 0):
-            print(f'query: \'{query}\' fetched with data')
+        if(len(results) > 0 and len(results[0]['results']) > 0 and len(results[0]['results'][query]) > 0):
+            print(f'query: \'{query}\' fetched with data'.encode(encoding='utf-8'))
             allResults = fromSearchData(results, query)
             searchQueue.task_done()
             onlyTitles = [item['title'] for item in allResults]
@@ -104,7 +112,7 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
             #     query: results
             # })
         else:
-            print(f'query: \'{query}\' unsuccessful, adding to queue again') 
+            print(f'query: \'{query}\' unsuccessful, adding to queue again'.encode(encoding='utf-8')) 
             searchQueue.task_done()
             searchQueue.put_nowait(data)
 
@@ -129,7 +137,9 @@ async def findAndSaveLinks(maxWorkers = 5):
     with tqdm(total=len(booksDf), desc="books data reading progress") as pbar:
         for row in booksDf.itertuples():
             # check in output file, if already that book id exist then skip
-            if('id' not in dfLinks or len(dfLinks[dfLinks['id']==row.id]) < len(search_words)):
+            # len(search_words)+3 because we started with 6 search terms, but it would have taken weeks of continous scraping to fetch 60000 records, so skipping 3 terms
+            # also we already had done scraping for some for 6 terms so this check has to be run with len+3 which is 6 right now
+            if('id' not in dfLinks or len(dfLinks[dfLinks['id']==row.id]) < len(search_words)+3): 
                 # extract title
                 title, work = getStringsAB(row.title)
                 for term in search_words:
@@ -150,7 +160,7 @@ async def findAndSaveLinks(maxWorkers = 5):
         w.cancel()
 
 
-asyncio.run(findAndSaveLinks())
+asyncio.run(findAndSaveLinks(maxWorkers=6))
 # find facts now
 
 
