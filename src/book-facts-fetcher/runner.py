@@ -34,6 +34,8 @@ search_words = [
 ]
 
 proxyServerUrl = 'http://localhost:3002/getlinks'
+proxyJhaoServerUrl = 'http://localhost:3002/getLinksJhao'
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 linksFile = os.path.join(dir_path,'books-with-relevant-links.csv')
 if os.path.isfile(linksFile):
@@ -82,7 +84,7 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
         data: QueueObj = await searchQueue.get()
         query = data['query']
         url = queryToUrl(query)
-        print(Fore.MAGENTA+f'{name} got url: {url} to work on')
+        print(Fore.MAGENTA+f'{name} got url: {url} to work on'+Fore.RESET)
         start = time.time()
         custom_timeout = aiohttp.ClientTimeout(total=60) # type: ignore
         # custom_timeout.total = 2*60
@@ -92,10 +94,10 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
             try:
                 results = await getSearchQueryResults(session, url)
             except asyncio.TimeoutError as e:
-                logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}' )
+                logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}'+Fore.RESET )
             except Exception as e:  # pylint: disable=broad-except
-                logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}' )
-        print(Fore.YELLOW+f'{name}\'s work for url {url} done; time taken {time.time() - start} seconds')
+                logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}'+Fore.RESET )
+        print(Fore.YELLOW+f'{name}\'s work for url {url} done; time taken {time.time() - start} seconds'+Fore.RESET)
         if(len(results) > 0 and len(results[0]['results']) > 0 and len(results[0]['results'][query]) > 0):
             print(f'query: \'{query}\' fetched with data'.encode(encoding='utf-8'))
             allResults = fromSearchData(results, query)
@@ -158,7 +160,6 @@ async def findAndSaveLinks(maxWorkers = 5):
     # cancel the now-idle workers, which wait for a new message that will never arrive
     for w in searchWorkers:
         w.cancel()
-
 
 asyncio.run(findAndSaveLinks(maxWorkers=6))
 # find facts now
