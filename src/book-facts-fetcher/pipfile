@@ -7,12 +7,12 @@ verify_ssl = true
 typing-extensions = "*"
 
 [packages]
-pandasgui = "*"
 strsimpy = "*"
 fuzzywuzzy = "*"
 pyqt5 = "*"
 colorama = "*"
 tqdm = "*"
+gensim = "==3.8.3"
 
 [requires]
 python_version = "3.8"
