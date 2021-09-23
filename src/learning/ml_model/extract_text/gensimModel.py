@@ -16,6 +16,7 @@ from gensim.corpora import Dictionary
 import math
 from .htmlProcess import tokenize_and_stem
 from gensim.models.phrases import Phrases 
+from tqdm import tqdm
 
 stop = set(stopwords.words('english'))
 exclude = set(string.punctuation) 
@@ -113,9 +114,9 @@ def getTfidfModel(docs_dict_values):
     # Trigram using Phraser Model 
     # trigram_model = Phrases(bigram_model[sents_list], threshold = 3) 
   
-    clean_docs_dict = [clean(docOrTokenList=docs, returnTokens=True) for docs in docs_dict_values]
+    clean_docs_dict = [clean(docOrTokenList=docs, returnTokens=True) for docs in tqdm(docs_dict_values, "cleaning docs")]
     dictionary = corpora.Dictionary(clean_docs_dict)
-    doc_term_matrix = [dictionary.doc2bow(doc) for doc in clean_docs_dict]
+    doc_term_matrix = [dictionary.doc2bow(doc) for doc in tqdm(clean_docs_dict, "doc_term_matrix")]
     tfidfModel = TfidfModel(corpus=doc_term_matrix, smartirs ='ntc')
     print('tfidf model trained at: ' + str(datetime.datetime.now()))
     # return (tfidfModel, dictionary, doc_term_matrix, trigram_model)
