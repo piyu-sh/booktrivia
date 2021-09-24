@@ -49,22 +49,24 @@ def deDupeLinks(searchLinks):
                 # print(f"duplicate: {links['link']}")
     return linkSet
 
-dfDedupedFull = {}
-if os.path.isfile(dedupedFile):
-    dfDedupedFull = pd.read_csv(dedupedFile, converters={'searchLinks': ast.literal_eval})
-else:
-    # raise os.error(f'{dedupedFile}  file needed')
-    print(f"agregating searchlinks...")
-    dfUpdatedFull =  dfLinks.groupby('book_id', sort=False).progress_aggregate(agg_searchLinks).reset_index()
-    dfDedupedFull = dfUpdatedFull.copy()
-    print(f"deduping searchlinks...")
-    dfDedupedFull['searchLinks'] = dfUpdatedFull['searchLinks'].progress_apply(deDupeLinks)
-    print(f"dropping query column...")
-    dfDedupedFull = dfDedupedFull.drop('query', 1)
-    print(f"saving dataframe to file: {dedupedFile}")
-    dfDedupedFull.to_csv(dedupedFile)
+def getDedupedSearchLinksDF():
+    dfDedupedFull = {}
+    if os.path.isfile(dedupedFile):
+        dfDedupedFull = pd.read_csv(dedupedFile, converters={'searchLinks': ast.literal_eval})
+    else:
+        # raise os.error(f'{dedupedFile}  file needed')
+        print(f"agregating searchlinks...")
+        dfUpdatedFull =  dfLinks.groupby('book_id', sort=False).progress_aggregate(agg_searchLinks).reset_index()
+        dfDedupedFull = dfUpdatedFull.copy()
+        print(f"deduping searchlinks...")
+        dfDedupedFull['searchLinks'] = dfUpdatedFull['searchLinks'].progress_apply(deDupeLinks)
+        print(f"dropping query column...")
+        dfDedupedFull = dfDedupedFull.drop('query', 1)
+        print(f"saving dataframe to file: {dedupedFile}")
+        dfDedupedFull.to_csv(dedupedFile, index=False)
+    return dfDedupedFull
 
-
+getDedupedSearchLinksDF()
 
 # dedupe links for a book id
 
