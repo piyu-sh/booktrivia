@@ -35,7 +35,7 @@ else:
 def agg_searchLinks(x):
     return list(x) if pd.Series(x).name == 'searchLinks' else x.iloc[0]
     
-def deDupeLinks(searchLinks):
+def deDupeAndSortLinks(searchLinks):
     # print('new row')
     uniqueLinks = {}
     linkSet = []
@@ -47,6 +47,7 @@ def deDupeLinks(searchLinks):
                 linkSet.append(links)
             # else:
                 # print(f"duplicate: {links['link']}")
+    linkSet.sort(key= lambda linkObj: linkObj['rank'])
     return linkSet
 
 def getDedupedSearchLinksDF():
@@ -59,18 +60,27 @@ def getDedupedSearchLinksDF():
         dfUpdatedFull =  dfLinks.groupby('book_id', sort=False).progress_aggregate(agg_searchLinks).reset_index()
         dfDedupedFull = dfUpdatedFull.copy()
         print(f"deduping searchlinks...")
-        dfDedupedFull['searchLinks'] = dfUpdatedFull['searchLinks'].progress_apply(deDupeLinks)
+        dfDedupedFull['searchLinks'] = dfUpdatedFull['searchLinks'].progress_apply(deDupeAndSortLinks)
         print(f"dropping query column...")
         dfDedupedFull = dfDedupedFull.drop('query', 1)
         print(f"saving dataframe to file: {dedupedFile}")
         dfDedupedFull.to_csv(dedupedFile, index=False)
     return dfDedupedFull
 
-getDedupedSearchLinksDF()
-
 # dedupe links for a book id
+dfDeduped = getDedupedSearchLinksDF()
 
 # fetch webpages per link per book
+
+# dfDeduped10 = dfDeduped.iloc[:10].copy()
+# sortedSearchLinks = sorted(dfDeduped10.iloc[0]['searchLinks'][0], key=lambda linkObj: linkObj['rank'])
+# [linkObj['rank'] for linkObj in sortedSearchLinks]
+
+# # create a mapping of searchLinks to scraped webpage accoring to position in original dataframe
+# scrapedPageMap = {}
+
+# # create a mapping of searchLinks to summarised scraped webpage accoring to position in original dataframe
+# summaryOfPageMap = {}
 
 # run model on webpages
 # (tfidf, dictionary, bow) = getTrainedModel()
