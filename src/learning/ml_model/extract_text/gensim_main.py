@@ -45,7 +45,7 @@ def writeHash(hashValue, hashFilePath):
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 with open(os.path.join(dir_path, "../../../config.yaml"), "r") as ymlfile:
-    cfg = yaml.load(ymlfile)
+    cfg = yaml.load(ymlfile, Loader=yaml.Loader)
 
 # @TODO: move corpus data to git as well
 def getTrainedModel(corpusDir='D:/linuxDownloads/iweb/' ):

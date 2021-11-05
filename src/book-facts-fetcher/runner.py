@@ -33,8 +33,8 @@ search_words = [
     "things you didn't know"
 ]
 
-proxyServerUrl = 'http://localhost:3002/getlinks'
-proxyJhaoServerUrl = 'http://localhost:3002/getLinksJhao'
+webSearcherUrl = 'http://localhost:3002/getlinks'
+webSearcherJhaoUrl = 'http://localhost:3002/getLinksJhao'
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 linksFile = os.path.join(dir_path,'books-with-relevant-links.csv')
@@ -67,7 +67,7 @@ def queryToUrl(title):
     query = parse.urlencode({
                 'keyword': title
             })
-    url = f'{proxyServerUrl}?{query}'
+    url = f'{webSearcherUrl}?{query}'
     return url   
 
 def saveLinks(bookRow):

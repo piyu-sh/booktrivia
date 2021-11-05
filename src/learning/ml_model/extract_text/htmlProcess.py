@@ -21,7 +21,7 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 with open(os.path.join(dir_path, "../../../config.yaml"), "r") as ymlfile:
-    cfg = yaml.load(ymlfile)
+    cfg = yaml.load(ymlfile, Loader=yaml.Loader)
 #
 ####
 
@@ -79,6 +79,10 @@ def getSents(text: str):
     sentences = [sent for sent in text.splitlines() if sent.strip()]
     return sentences
 
+# example usage
+# articleUrl = 'https://www.goodreads.com/book/show/30257963-12-rules-for-life'
+# urlDataframe = pd.DataFrame([articleUrl], columns=['1'])
+# docs_dict, sents_dict = getDocsAndSents(urlDataframe, '1', 5)
 def getDocsAndSents(results: DataFrame, columnName: str, retries: int):
     text_dic = {}
     sents_dic = {}
@@ -97,6 +101,28 @@ def getDocsAndSents(results: DataFrame, columnName: str, retries: int):
 #         if(len(results > 5) and index !=len(results)-1):
 #             time.sleep(5)
     return text_dic, sents_dic
+
+# copied from @getDocsAndSents just to run for one url
+def getDocsAndSentsPerUrl(url: str, retries: int):
+    text_dic = {}
+    sents_dic = {}
+    g = Goose()
+    # for index in range(len(results)):
+    # url = results.iloc[index][columnName]
+    soup = getSoupObj(url, retries)
+#         sents = getSentences(soup)
+    article = g.extract(raw_html=str(soup if soup.get_text().strip() else '.'))
+    sents = getSents(article.cleaned_text)
+#         doc = '. '.join(chunk for chunk in sents if chunk)
+#         doc = soup.get_text()
+    sents = removeTitleLikeSents(article.title, sents, 0.34)
+    text_dic[0] = article.cleaned_text
+    sents_dic[0] = sents
+#         if(len(results > 5) and index !=len(results)-1):
+#             time.sleep(5)
+    return text_dic, sents_dic
+
+
 
 def tokenize_and_stem(text):
     tokens = [word for sent in nltk.sent_tokenize(text) for word in nltk.word_tokenize(sent)]

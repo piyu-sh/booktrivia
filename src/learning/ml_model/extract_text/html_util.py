@@ -1,8 +1,8 @@
 import requests
 
 def getHtmlUsingProxies(url:str, proxyApiUrl:str, retries:int=3):    
-    # proxies = get_proxies(proxyApiUrl, retries)
-    proxies = get_Jhao104_Proxy(proxyApiUrl, retries)
+    proxies = get_proxies(proxyApiUrl, retries)
+    # proxies = get_Jhao104_Proxy(proxyApiUrl, retries)
     timeout=2#     for proxyObj in proxiesStore:
     proxiesList = list(proxies)
     for x in range(0, len(proxiesList)):
