@@ -111,7 +111,7 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
         # custom_timeout.total = 2*60
         async with aiohttp.ClientSession(timeout=custom_timeout) as session:
             # nonlocal results
-            results=[]
+            summary_sents={}
             try:
                 docs_dict, sents_dict = getDocsAndSentsPerUrl(factsLink, 5)
                 summary_sents = getTfidfSummary(tfidfModel=tfidf, dictionary=dictionary, docs_dict=docs_dict, sents_dict=sents_dict)
