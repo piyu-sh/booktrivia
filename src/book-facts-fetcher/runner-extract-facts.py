@@ -10,8 +10,8 @@ import logging
 import ast
 from tqdm import tqdm
 from colorama import init, Fore, Back, Style
+from urllib.parse import urlparse
 
-from learning.ml_model.extract_text.htmlProcess import getDocsAndSentsPerUrl
 
 tqdm.pandas()
 
@@ -19,6 +19,7 @@ currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 
+from learning.ml_model.extract_text.htmlProcess import getDocsAndSentsPerUrl
 from learning.ml_model.extract_text.gensim_main import getTrainedModel
 from learning.ml_model.extract_text.gensimModel import getLdaModel, getSummary, getTfidfModel, getTfidfSummary, printSummary
 
@@ -92,7 +93,10 @@ dfDeduped = getDedupedSearchLinksDF()
 
 
 def saveFacts(bookRow):
-    bookRow.to_csv(factsFile, mode='a', index=False, header=False)
+    if os.path.isfile(factsFile):
+        bookRow.to_csv(factsFile, mode='a', index=False, header=False)
+    else:
+        bookRow.to_csv(factsFile, mode='a', index=False)
 
 class QueueObj(TypedDict):
     id: str
@@ -112,19 +116,33 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
         async with aiohttp.ClientSession(timeout=custom_timeout) as session:
             # nonlocal results
             summary_sents={}
+            docs_dict = {0: ''}
+            sents_dict = {0: ''}
+            isSkipped = True
             try:
-                docs_dict, sents_dict = getDocsAndSentsPerUrl(factsLink, 5)
-                summary_sents = getTfidfSummary(tfidfModel=tfidf, dictionary=dictionary, docs_dict=docs_dict, sents_dict=sents_dict)
+                if(urlparse(factsLink).path.endswith(".pdf") == False):
+                    isSkipped=False
+                    docs_dict, sents_dict = getDocsAndSentsPerUrl(factsLink, 5)
+                    summary_sents = getTfidfSummary(tfidfModel=tfidf, dictionary=dictionary, docs_dict=docs_dict, sents_dict=sents_dict)
             except asyncio.TimeoutError as e:
                 logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}'+Fore.RESET )
             except Exception as e:  # pylint: disable=broad-except
                 logging.exception(Fore.RED+f'Exception raised by worker = {name}; error = {e}'+Fore.RESET )
         print(Fore.YELLOW+f'{name}\'s work for url {factsLink} done; time taken {time.time() - start} seconds'+Fore.RESET)
-        if(len(sents_dict[0]) > 2):
+        if(isSkipped == True):
+            print(f'factsLink: \'{factsLink}\' skipped because its pdf'.encode(encoding='utf-8'))
+            searchQueue.task_done()
+            bookRow = dfDeduped[dfDeduped['id']==data['id']].copy()
+            bookRow['factsLink'] = factsLink
+            bookRow['facts'] = [['']]
+            saveFacts(bookRow)
+            queueProgress.update(1)
+        elif(len(sents_dict[0]) > 2):
             print(f'factsLink: \'{factsLink}\' fetched with > 2 sentences'.encode(encoding='utf-8'))
             searchQueue.task_done()
             bookRow = dfDeduped[dfDeduped['id']==data['id']].copy()
-            bookRow['factsLink'] = summary_sents[0]
+            bookRow['factsLink'] = factsLink
+            bookRow['facts'] = [[sent for score,sent in summary_sents[0]]]
             saveFacts(bookRow)
             queueProgress.update(1)
         else:
@@ -155,10 +173,10 @@ async def fetchWebpagesAndSaveFacts(maxWorkers = 5):
         for row in dfDeduped.itertuples():
             # check in output file, if already that book id exist then skip
             for searchLink in row.searchLinks:
-                if('id' not in dfFacts or 'factsLink' not in dfFacts or len(dfFacts[(dfFacts['id'] == row.id) & (dfFacts['factsLink'] == searchLink.link)] < 1)):
+                if('id' not in dfFacts or 'factsLink' not in dfFacts or len(dfFacts[(dfFacts['id'] == row.id)]) < 1 or len(dfFacts[(dfFacts['id'] == row.id) & (dfFacts['factsLink'] == searchLink['link'])]) < 1):
                     fetchQueue.put_nowait({
                             'id': row.id,
-                            'factsLink': searchLink.link
+                            'factsLink': searchLink['link']
                         })
             pbar.update(1)
 
