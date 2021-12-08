@@ -31,6 +31,22 @@ def getHtmlUsingProxies(url:str, proxyApiUrl:str, retries:int=3):
     print("can't fetch this doc")
     return ''
 
+def getHtmlWithoutProxies(url:str):    
+    timeout=10
+    try:
+        print('fetching '+url)
+        # headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+        response = requests.get(url, timeout=timeout)
+        if(response.status_code == requests.codes['ok']): #pylint: disable=no-member
+            print('fetched')
+            return response.text
+        else:
+            print('Skipping. status code '+ str(response.status_code))
+    except Exception as e:
+        print("Skipping. Connnection error " + str(e))
+    print("can't fetch this doc")
+    return ''
+
 def get_proxies(proxyApiUrl:str, num:int=1):
     return requests.get(proxyApiUrl+'/'+ str(num)).json()
 

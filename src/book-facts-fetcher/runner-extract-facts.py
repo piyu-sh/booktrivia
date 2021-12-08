@@ -11,7 +11,10 @@ import ast
 from tqdm import tqdm
 from colorama import init, Fore, Back, Style
 from urllib.parse import urlparse
-
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 tqdm.pandas()
 
@@ -78,6 +81,9 @@ def getDedupedSearchLinksDF():
 
 # dedupe links for a book id
 dfDeduped = getDedupedSearchLinksDF()
+
+# reversing the dataframe to start from end for remaining books
+# dfDeduped = dfDeduped[::-1]
 
 # get trained model
 (tfidf, dictionary, bow) = getTrainedModel(corpusDir='D:/linuxDownloads/iweb/')
@@ -148,6 +154,7 @@ async def searchWorker(name: str, searchQueue: Queue, queueProgress: tqdm):
         else:
             print(f'factsLink: \'{factsLink}\' unsuccessful, returned < 2 sents, adding to queue again'.encode(encoding='utf-8')) 
             searchQueue.task_done()
+            queueProgress.update(1)
             searchQueue.put_nowait(data)
 
 def _handle_task_result(task: asyncio.Task) -> None:
@@ -172,16 +179,23 @@ async def fetchWebpagesAndSaveFacts(maxWorkers = 5):
     with tqdm(total=len(dfDeduped), desc="books data reading progress") as pbar:
         for row in dfDeduped.itertuples():
             # check in output file, if already that book id exist then skip
-            for searchLink in row.searchLinks:
-                if('id' not in dfFacts or 'factsLink' not in dfFacts or len(dfFacts[(dfFacts['id'] == row.id)]) < 1 or len(dfFacts[(dfFacts['id'] == row.id) & (dfFacts['factsLink'] == searchLink['link'])]) < 1):
-                    fetchQueue.put_nowait({
-                            'id': row.id,
-                            'factsLink': searchLink['link']
-                        })
+            for index, searchLink in enumerate(row.searchLinks):
+                if('id' not in dfFacts 
+                    or 'factsLink' not in dfFacts 
+                    or index < 5
+                    and (len(dfFacts[(dfFacts['id'] == row.id)]) < 1
+                        or len(dfFacts[(dfFacts['id'] == row.id)]) <= 5
+                        and len(dfFacts[(dfFacts['id'] == row.id) & (dfFacts['factsLink'] == searchLink['link'])]) < 1)):
+                        fetchQueue.put_nowait({
+                                'id': row.id,
+                                'factsLink': searchLink['link']
+                            })
+                        queueProgress.total = fetchQueue.qsize()
+                        queueProgress.refresh()
             pbar.update(1)
 
-    queueProgress.total = fetchQueue.qsize()
-    queueProgress.refresh()
+    # queueProgress.total = fetchQueue.qsize()
+    # queueProgress.refresh()
     await fetchQueue.join()
     # cancel the now-idle workers, which wait for a new message that will never arrive
     for w in fetchWorkers:
