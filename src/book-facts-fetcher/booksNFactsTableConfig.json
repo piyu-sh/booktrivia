@@ -1,0 +1,19 @@
+{
+    "TableName": "booksNFactsTable",
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "id",
+            "AttributeType": "S"
+        }
+    ],
+    "KeySchema": [
+        {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+        }
+    ],
+    "ProvisionedThroughput": {
+        "ReadCapacityUnits": 4,
+        "WriteCapacityUnits": 4
+    }
+}

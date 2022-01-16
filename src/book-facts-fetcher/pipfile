@@ -21,6 +21,7 @@ goose3 = "*"
 pyyaml = "*"
 beautifulsoup4 = "*"
 readability-lxml = "*"
+boto3 = "*"
 
 [requires]
 python_version = "3.8"
